@@ -16,6 +16,7 @@ import org.jetbrains.compose.experimental.web.tasks.ExperimentalUnpackSkikoWasmR
 import org.jetbrains.compose.internal.utils.*
 import org.jetbrains.compose.internal.utils.registerTask
 import org.jetbrains.compose.internal.utils.uppercaseFirstChar
+import org.jetbrains.kotlin.gradle.targets.js.ir.JsIrBinary
 import org.jetbrains.kotlin.gradle.targets.js.ir.KotlinJsIrTarget
 
 internal fun Collection<KotlinJsIrTarget>.configureExperimentalWebApplication(
@@ -42,6 +43,14 @@ internal fun Collection<KotlinJsIrTarget>.configureExperimentalWebApplication(
         project.tasks.named(mainCompilation.processResourcesTaskName).configure { processResourcesTask ->
             processResourcesTask.dependsOn(unpackRuntime)
         }
+        mainCompilation.binaries
+            .matching { it is JsIrBinary }
+            .all {
+                it as JsIrBinary
+                it.linkTask.configure {
+                    it.doLast(CreateLoadMjsAction)
+                }
+            }
     }
 }
 
